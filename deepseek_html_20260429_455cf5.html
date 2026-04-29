@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>بحث عن الطالب - عرض الدرجات والمواد</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Tahoma', 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        /* Main Card */
+        .filter-card {
+            background: white;
+            border-radius: 28px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.25);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0f2027 0%, #203a43 100%);
+            padding: 28px 32px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .header p {
+            opacity: 0.85;
+            font-size: 0.9rem;
+        }
+
+        /* Excel Connection Panel */
+        .excel-panel {
+            background: #f0f9ff;
+            padding: 20px 32px;
+            border-bottom: 1px solid #cbd5e1;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .file-status {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .status-badge {
+            background: #e2e8f0;
+            padding: 6px 14px;
+            border-radius: 40px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .status-badge.success {
+            background: #10b981;
+            color: white;
+        }
+
+        .status-badge.warning {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .status-badge.info {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .file-input-label {
+            background: #1e293b;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 40px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .file-input-label:hover {
+            background: #0f172a;
+            transform: translateY(-1px);
+        }
+
+        .sheet-selector {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .sheet-selector select {
+            padding: 8px 16px;
+            border-radius: 30px;
+            border: 1px solid #cbd5e1;
+            background: white;
+            font-size: 0.85rem;
+        }
+
+        /* Filter Area */
+        .filter-area {
+            padding: 28px 32px;
+            background: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: flex-end;
+        }
+
+        .input-field {
+            flex: 2;
+            min-width: 200px;
+        }
+
+        .input-field label {
+            display: block;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+        }
+
+        .input-field input {
+            width: 100%;
+            padding: 14px 16px;
+            font-size: 1rem;
+            border: 2px solid #cbd5e1;
+            border-radius: 14px;
+            transition: all 0.3s;
+            font-family: monospace;
+            font-size: 1rem;
+        }
+
+        .input-field input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 14px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+            box-shadow: 0 2px 8px rgba(59,130,246,0.3);
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #64748b;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #475569;
+            transform: translateY(-2px);
+        }
+
+        .warning-note {
+            background: #fef3c7;
+            padding: 12px 16px;
+            border-radius: 14px;
+            margin-top: 16px;
+            font-size: 0.8rem;
+            color: #92400e;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-right: 4px solid #f59e0b;
+        }
+
+        /* Active Filter Badge */
+        .active-filter {
+            background: #dbeafe;
+            padding: 12px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            border-bottom: 1px solid #bfdbfe;
+        }
+
+        .badge {
+            background: #3b82f6;
+            color: white;
+            padding: 5px 14px;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        /* Results Cards */
+        .results-area {
+            padding: 28px 32px 32px 32px;
+            background: white;
+        }
+
+        .student-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            overflow: hidden;
+            margin-bottom: 20px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            color: white;
+            padding: 20px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .student-id {
+            font-size: 1.2rem;
+            font-weight: 700;
+            font-family: monospace;
+            background: #334155;
+            padding: 5px 14px;
+            border-radius: 40px;
+        }
+
+        .overall-grade {
+            background: #10b981;
+            padding: 6px 18px;
+            border-radius: 40px;
+            font-weight: 700;
+        }
+
+        .subjects-grid {
+            padding: 24px;
+        }
+
+        .subjects-title {
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 10px;
+        }
+
+        .subjects-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 12px;
+        }
+
+        .subject-item {
+            background: #f8fafc;
+            padding: 12px 16px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-right: 4px solid #3b82f6;
+        }
+
+        .subject-name {
+            font-weight: 600;
+            color: #334155;
+            font-size: 0.85rem;
+        }
+
+        .subject-grade {
+            font-weight: 800;
+            background: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-family: monospace;
+        }
+
+        .no-results, .info-message {
+            text-align: center;
+            padding: 50px 30px;
+            background: #f8fafc;
+            border-radius: 20px;
+            color: #64748b;
+        }
+
+        .info-message {
+            background: #e0f2fe;
+            color: #0369a1;
+        }
+
+        @media (max-width: 640px) {
+            .filter-area, .excel-panel, .results-area {
+                padding: 20px;
+            }
+            .subjects-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+    <!-- SheetJS for Excel parsing -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+<div class="container">
+    <div class="filter-card">
+        <div class="header">
+            <h1>
+                📊 بحث عن الطالب بالرقم المعرف
+                <span style="font-size: 0.7rem; background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 30px;">ربط مباشر مع ملف Excel</span>
+            </h1>
+            <p>قم بتحميل ملف Excel من مجلد التنزيلات → ابحث برقم الطالب → عرض جميع الدرجات والمواد</p>
+        </div>
+
+        <!-- Excel Connection Panel -->
+        <div class="excel-panel">
+            <div class="file-status">
+                <span id="connectionStatus" class="status-badge warning">⚠️ غير متصل</span>
+                <span id="rowCountBadge" class="status-badge">📄 0 طالب</span>
+            </div>
+            <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                <label class="file-input-label">
+                    📂 اختيار ملف Excel
+                    <input type="file" id="excelFileInput" accept=".xlsx, .xls, .csv" style="display: none;">
+                </label>
+                <div class="sheet-selector" id="sheetSelector" style="display: none;">
+                    <span>📑 الورقة:</span>
+                    <select id="sheetSelect"></select>
+                </div>
+                <button id="refreshDemoBtn" class="btn-secondary" style="padding: 8px 18px;">🔄 بيانات تجريبية</button>
+            </div>
+        </div>
+
+        <div class="filter-area">
+            <div class="input-group">
+                <div class="input-field">
+                    <label>🎯 الرقم المعرف للطالب (بحث تام)</label>
+                    <input type="number" id="studentIdInput" placeholder="مثال: 101, 105, 112" step="1">
+                </div>
+                <div class="button-group">
+                    <button class="btn btn-primary" id="applyFilterBtn">🔍 عرض الدرجات</button>
+                    <button class="btn btn-secondary" id="clearFilterBtn">🗑️ إلغاء الفلتر</button>
+                </div>
+            </div>
+            <div class="warning-note">
+                ⚠️ <strong>بحث مطابق تام</strong> — يتم البحث بالرقم المعرف للطالب لعرض جميع المواد (8 مواد) والدرجة النهائية.
+            </div>
+        </div>
+
+        <div id="activeFilterBanner" class="active-filter" style="display: none;">
+            <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+                <span class="badge">🔍 الفلتر النشط</span>
+                <span>رقم الطالب = <strong id="activeIdDisplay"></strong></span>
+                <span id="matchCountSpan"></span>
+            </div>
+            <button id="clearFromBannerBtn" style="background: none; border: none; color: #3b82f6; cursor: pointer; font-weight: 600;">✖️ إلغاء</button>
+        </div>
+
+        <div class="results-area" id="resultsArea">
+            <div class="info-message">
+                💡 الخطوة 1: اضغط "اختيار ملف Excel" واختر الملف من مجلد التنزيلات (يفضل أن الورقة تحتوي على بيانات الطلاب).<br>
+                📌 الخطوة 2: أدخل رقم الطالب (101-115) → اضغط "عرض الدرجات" لمشاهدة جميع المواد والدرجات.
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // تخزين البيانات
+    let excelData = [];          // مصفوفة تحتوي بيانات الطلاب المحملة
+    let currentFilterId = null;
+    let currentSheetName = "";
+    let workbookSheets = [];
+
+    // العناصر في الصفحة
+    const excelFileInput = document.getElementById('excelFileInput');
+    const sheetSelect = document.getElementById('sheetSelect');
+    const sheetSelectorDiv = document.getElementById('sheetSelector');
+    const connectionStatus = document.getElementById('connectionStatus');
+    const rowCountBadge = document.getElementById('rowCountBadge');
+    const studentIdInput = document.getElementById('studentIdInput');
+    const applyBtn = document.getElementById('applyFilterBtn');
+    const clearBtn = document.getElementById('clearFilterBtn');
+    const clearFromBannerBtn = document.getElementById('clearFromBannerBtn');
+    const activeFilterBanner = document.getElementById('activeFilterBanner');
+    const activeIdDisplay = document.getElementById('activeIdDisplay');
+    const matchCountSpan = document.getElementById('matchCountSpan');
+    const resultsArea = document.getElementById('resultsArea');
+    const refreshDemoBtn = document.getElementById('refreshDemoBtn');
+
+    // دالة للكشف عن عامود ID (رقم الطالب)
+    function findIdColumn(row) {
+        if (!row) return null;
+        const keys = Object.keys(row);
+        const idKey = keys.find(k => k.toLowerCase().includes('id') || k.toLowerCase() === 'student id' || k.toLowerCase() === 'studentid' || k === 'Id' || k === 'الرقم');
+        if (idKey) return idKey;
+        return keys[0];
+    }
+
+    // دالة للكشف عن عامود اسم الطالب
+    function findNameColumn(row) {
+        const keys = Object.keys(row);
+        return keys.find(k => k.toLowerCase().includes('name') || k.toLowerCase().includes('student') || k.includes('الاسم')) || null;
+    }
+
+    // دالة للكشف عن عامود الدرجة النهائية
+    function findOverallColumn(row) {
+        const keys = Object.keys(row);
+        return keys.find(k => k.toLowerCase().includes('overall') || k.toLowerCase().includes('grade') || k.includes('النهائية') || k.includes('المجموع')) || null;
+    }
+
+    // دالة للكشف عن أعمدة المواد
+    function findSubjectColumns(row) {
+        const keys = Object.keys(row);
+        const subjectCols = [];
+        for (let i = 1; i <= 10; i++) {
+            const patterns = [`subject ${i}`, `subject${i}`, `subj ${i}`, `subj${i}`, `مادة ${i}`, `المادة ${i}`];
+            for (let pattern of patterns) {
+                const match = keys.find(k => k.toLowerCase() === pattern.toLowerCase());
+                if (match && !subjectCols.includes(match)) {
+                    subjectCols.push(match);
+                    break;
+                }
+            }
+        }
+        keys.forEach(k => {
+            if ((k.toLowerCase().includes('subject') || k.includes('مادة')) && !subjectCols.includes(k)) {
+                subjectCols.push(k);
+            }
+        });
+        subjectCols.sort();
+        return subjectCols.slice(0, 12);
+    }
+
+    // تحويل صفوف Excel إلى كائنات طلاب
+    function transformExcelToStudents(rows) {
+        if (!rows || rows.length === 0) return [];
+        
+        const idCol = findIdColumn(rows[0]);
+        const nameCol = findNameColumn(rows[0]);
+        const overallCol = findOverallColumn(rows[0]);
+        const subjectCols = findSubjectColumns(rows[0]);
+        
+        const students = [];
+        for (let row of rows) {
+            let idValue = idCol ? row[idCol] : null;
+            if (idValue === undefined || idValue === null) continue;
+            
+            let studentId = Number(idValue);
+            if (isNaN(studentId)) {
+                const numMatch = String(idValue).match(/\d+/);
+                if (numMatch) studentId = parseInt(numMatch[0]);
+                else continue;
+            }
+            
+            const name = nameCol ? (row[nameCol] || `طالب ${studentId}`) : `طالب ${studentId}`;
+            const overall = overallCol ? (row[overallCol] || "غير محدد") : "غير محدد";
+            
+            const subjects = {};
+            for (let subjCol of subjectCols) {
+                let grade = row[subjCol];
+                if (grade === undefined || grade === null) grade = "—";
+                subjects[subjCol] = String(grade);
+            }
+            
+            if (Object.keys(subjects).length === 0) {
+                for (let i = 1; i <= 8; i++) {
+                    subjects[`المادة ${i}`] = row[`subject ${i}`] || row[`المادة ${i}`] || "—";
+                }
+            }
+            
+            students.push({
+                id: studentId,
+                name: String(name).trim(),
+                overall: String(overall),
+                subjects: subjects,
+                rawRow: row
+            });
+        }
+        
+        students.sort((a,b) => a.id - b.id);
+        return students;
+    }
+
+    // تحميل البيانات إلى التطبيق
+    function loadDataIntoApp(studentsArray, sourceName = "Excel") {
+        if (!studentsArray || studentsArray.length === 0) {
+            excelData = [];
+            connectionStatus.className = "status-badge warning";
+            connectionStatus.innerHTML = "⚠️ لا توجد بيانات";
+            rowCountBadge.innerHTML = "📄 0 طالب";
+            resultsArea.innerHTML = `<div class="info-message">⚠️ لم يتم العثور على بيانات طلاب صالحة في الملف. تأكد من وجود أعمدة: رقم الطالب، الأسماء، المواد.</div>`;
+            activeFilterBanner.style.display = "none";
+            currentFilterId = null;
+            return;
+        }
+        
+        excelData = studentsArray;
+        connectionStatus.className = "status-badge success";
+        connectionStatus.innerHTML = `✅ تم الاتصال (${sourceName})`;
+        rowCountBadge.innerHTML = `📄 ${excelData.length} طالب`;
+        
+        currentFilterId = null;
+        studentIdInput.value = "";
+        activeFilterBanner.style.display = "none";
+        resultsArea.innerHTML = `<div class="info-message">✅ تم تحميل ${excelData.length} طالب من ${sourceName}. أدخل رقم الطالب (${excelData[0]?.id} - ${excelData[excelData.length-1]?.id}) واضغط "عرض الدرجات".</div>`;
+        
+        window.dispatchEvent(new CustomEvent('excelDataLoaded', { 
+            detail: { count: excelData.length, source: sourceName, ids: excelData.map(s => s.id) }
+        }));
+    }
+
+    // معالجة ملف Excel المرفوع
+    function handleExcelFile(file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            workbookSheets = workbook.SheetNames;
+            
+            if (workbookSheets.length === 0) {
+                alert("لا توجد أوراق عمل في ملف Excel.");
+                return;
+            }
+            
+            sheetSelect.innerHTML = "";
+            workbookSheets.forEach(sheetName => {
+                const option = document.createElement('option');
+                option.value = sheetName;
+                option.textContent = sheetName;
+                sheetSelect.appendChild(option);
+            });
+            sheetSelectorDiv.style.display = "flex";
+            
+            loadSheetData(workbook, workbookSheets[0]);
+            
+            sheetSelect.onchange = function() {
+                loadSheetData(workbook, sheetSelect.value);
+            };
+        };
+        reader.onerror = () => alert("حدث خطأ في قراءة الملف.");
+        reader.readAsArrayBuffer(file);
+    }
+    
+    function loadSheetData(workbook, sheetName) {
+        const worksheet = workbook.Sheets[sheetName];
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
+        if (!jsonData || jsonData.length === 0) {
+            alert(`الورقة "${sheetName}" لا تحتوي على بيانات.`);
+            return;
+        }
+        currentSheetName = sheetName;
+        const students = transformExcelToStudents(jsonData);
+        loadDataIntoApp(students, `Excel: ${sheetName}`);
+    }
+    
+    // بيانات تجريبية (مطابقة للجدول الأصلي)
+    function loadDemoData() {
+        const demoRows = [
+            { "Id":101, "Student name":"أسامة 1", "overall grade":"90%", "subject 1":"A+", "subject 2":"A-", "subject 3":"A", "subject 4":"A++", "subject 5":"B+", "subject 6":"B++", "subject 7":"C+", "subject 8":"A+" },
+            { "Id":102, "Student name":"أسامة 2", "overall grade":"90%", "subject 1":"A+", "subject 2":"A-", "subject 3":"A", "subject 4":"A++", "subject 5":"B-", "subject 6":"B++", "subject 7":"C+", "subject 8":"A+" },
+            { "Id":103, "Student name":"أسامة 3", "overall grade":"90%", "subject 1":"A+", "subject 2":"A-", "subject 3":"A", "subject 4":"A++", "subject 5":"B-", "subject 6":"B++", "subject 7":"C+", "subject 8":"A+" },
+            { "Id":104, "Student name":"أسامة 4", "overall grade":"90%", "subject 1":"A+", "subject 2":"A-", "subject 3":"A", "subject 4":"A++", "subject 5":"B-", "subject 6":"B++", "subject 7":"C+", "subject 8":"A+" },
+            { "Id":105, "Student name":"أسامة 5", "overall grade":"90%", "subject 1":"A+", "subject 2":"A+", "subject 3":"A+", "subject 4":"C+", "subject 5":"A+", "subject 6":"B-", "subject 7":"A+", "subject 8":"A+" },
+            { "Id":106, "Student name":"أسامة 6", "overall grade":"91%", "subject 1":"A+", "subject 2":"A+", "subject 3":"A+", "subject 4":"C+", "subject 5":"A+", "subject 6":"B-", "subject 7":"A+", "subject 8":"A+" },
+            { "Id":107, "Student name":"أسامة 7", "overall grade":"91%", "subject 1":"A+", "subject 2":"A+", "subject 3":"A+", "subject 4":"C+", "subject 5":"A+", "subject 6":"B-", "subject 7":"A+", "subject 8":"A+" },
+            { "Id":108, "Student name":"أسامة 8", "overall grade":"91%", "subject 1":"C+", "subject 2":"C+", "subject 3":"C+", "subject 4":"B-", "subject 5":"B-", "subject 6":"C+", "subject 7":"B-", "subject 8":"A+" },
+            { "Id":109, "Student name":"أسامة 9", "overall grade":"91%", "subject 1":"C+", "subject 2":"C+", "subject 3":"C+", "subject 4":"B-", "subject 5":"B-", "subject 6":"C+", "subject 7":"B-", "subject 8":"A+" },
+            { "Id":110, "Student name":"أسامة 10", "overall grade":"91%", "subject 1":"A+", "subject 2":"A-", "subject 3":"A", "subject 4":"A++", "subject 5":"B-", "subject 6":"B++", "subject 7":"C+", "subject 8":"A+" },
+            { "Id":111, "Student name":"أسامة 11", "overall grade":"91%", "subject 1":"A+", "subject 2":"A-", "subject 3":"A", "subject 4":"A++", "subject 5":"B-", "subject 6":"B++", "subject 7":"C+", "subject 8":"A+" },
+            { "Id":112, "Student name":"أسامة 12", "overall grade":"91%", "subject 1":"A+", "subject 2":"A-", "subject 3":"A", "subject 4":"A++", "subject 5":"B-", "subject 6":"B++", "subject 7":"C+", "subject 8":"A+" },
+            { "Id":113, "Student name":"أسامة 13", "overall grade":"91%", "subject 1":"A+", "subject 2":"A+", "subject 3":"A+", "subject 4":"C+", "subject 5":"A+", "subject 6":"B-", "subject 7":"A+", "subject 8":"A+" },
+            { "Id":114, "Student name":"أسامة 14", "overall grade":"91%", "subject 1":"A+", "subject 2":"A+", "subject 3":"A+", "subject 4":"C+", "subject 5":"A+", "subject 6":"B-", "subject 7":"A+", "subject 8":"A+" },
+            { "Id":115, "Student name":"أسامة 15", "overall grade":"91%", "subject 1":"A+", "subject 2":"A+", "subject 3":"A+", "subject 4":"C+", "subject 5":"A+", "subject 6":"B-", "subject 7":"A+", "subject 8":"A+" }
+        ];
+        const students = transformExcelToStudents(demoRows);
+        loadDataIntoApp(students, "بيانات تجريبية");
+        sheetSelectorDiv.style.display = "none";
+    }
+    
+    // عرض بطاقة الطالب
+    function displayStudentCard(student) {
+        const subjectsEntries = Object.entries(student.subjects);
+        return `
+            <div class="student-card">
+                <div class="card-header">
+                    <div class="student-id">🆔 الرقم: ${student.id}</div>
+                    <div style="font-weight: 600;">👤 ${student.name}</div>
+                    <div class="overall-grade">📊 الدرجة النهائية: ${student.overall}</div>
+                </div>
+                <div class="subjects-grid">
+                    <div class="subjects-title">
+                        📚 جميع المواد والدرجات (${subjectsEntries.length} مادة)
+                    </div>
+                    <div class="subjects-container">
+                        ${subjectsEntries.map(([subject, grade]) => `
+                            <div class="subject-item">
+                                <span class="subject-name">📖 ${subject}</span>
+                                <span class="subject-grade">${grade}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    // فلتر البحث بالرقم المعرف
+    function filterById() {
+        if (!excelData.length) {
+            resultsArea.innerHTML = `<div class="info-message">⚠️ لا توجد بيانات محملة. الرجاء اختيار ملف Excel أولاً.</div>`;
+            return;
+        }
+        
+        const rawId = studentIdInput.value.trim();
+        if (rawId === "") {
+            resultsArea.innerHTML = `<div class="info-message">📌 أدخل رقم الطالب لعرض الدرجات والمواد.</div>`;
+            activeFilterBanner.style.display = "none";
+            currentFilterId = null;
+            return;
+        }
+        
+        const idNum = Number(rawId);
+        if (isNaN(idNum)) {
+            resultsArea.innerHTML = `<div class="no-results"><h3>❌ رقم غير صالح</h3><p>الرجاء إدخال رقم صحيح (مثال: 101)</p></div>`;
+            return;
+        }
+        
+        const matchedStudent = excelData.find(s => s.id === idNum);
+        if (!matchedStudent) {
+            resultsArea.innerHTML = `<div class="no-results">
+                <h3>🔍 لا يوجد طالب بالرقم: ${idNum}</h3>
+                <p>الأرقام المتاحة: ${excelData.map(s => s.id).join(', ')}</p>
+            </div>`;
+            activeFilterBanner.style.display = "flex";
+            activeIdDisplay.innerText = idNum;
+            matchCountSpan.innerText = `0 تطابق`;
+            currentFilterId = idNum;
+            return;
+        }
+        
+        resultsArea.innerHTML = displayStudentCard(matchedStudent);
+        activeFilterBanner.style.display = "flex";
+        activeIdDisplay.innerText = matchedStudent.id;
+        matchCountSpan.innerText = `✅ طالب واحد · ${Object.keys(matchedStudent.subjects).length} مادة`;
+        currentFilterId = matchedStudent.id;
+        
+        window.dispatchEvent(new CustomEvent('studentFilterChanged', { detail: { studentId: matchedStudent.id, student: matchedStudent } }));
+        localStorage.setItem('lastFilteredStudent', JSON.stringify(matchedStudent));
+    }
+    
+    function clearFilter() {
+        studentIdInput.value = "";
+        currentFilterId = null;
+        activeFilterBanner.style.display = "none";
+        if (excelData.length) {
+            resultsArea.innerHTML = `<div class="info-message">✅ تم إلغاء الفلتر. يوجد ${excelData.length} طالب محمل. أدخل رقم الطالب لعرض الدرجات.</div>`;
+        } else {
+            resultsArea.innerHTML = `<div class="info-message">📂 لا توجد بيانات. الرجاء اختيار ملف Excel من مجلد التنزيلات.</div>`;
+        }
+    }
+    
+    // ربط الأحداث
+    excelFileInput.addEventListener('change', (e) => {
+        if (e.target.files && e.target.files[0]) {
+            handleExcelFile(e.target.files[0]);
+        }
+        excelFileInput.value = '';
+    });
+    
+    refreshDemoBtn.addEventListener('click', loadDemoData);
+    applyBtn.addEventListener('click', filterById);
+    clearBtn.addEventListener('click', clearFilter);
+    clearFromBannerBtn.addEventListener('click', clearFilter);
+    studentIdInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') filterById(); });
+    
+    // دوال مساعدة للتكامل الخارجي (Power BI ...)
+    window.getStudentData = () => excelData;
+    window.getFilteredStudentId = () => currentFilterId;
+    window.applyStudentFilter = (id) => { studentIdInput.value = id; filterById(); };
+    
+    console.log("✅ النظام جاهز | يمكنك ربط ملف Excel والبحث برقم الطالب");
+</script>
+</body>
+</html>
